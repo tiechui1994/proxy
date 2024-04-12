@@ -12,6 +12,7 @@ type TLSConfig struct {
 	Host           string
 	SkipCertVerify bool
 	NextProtos     []string
+	FingerPrint string
 }
 
 func StreamTLSConn(conn net.Conn, cfg *TLSConfig) (net.Conn, error) {

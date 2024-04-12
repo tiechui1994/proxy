@@ -10,6 +10,7 @@ require (
 	golang.org/x/crypto v0.19.0
 	golang.org/x/net v0.17.0
 	golang.org/x/sys v0.17.0
+	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
 

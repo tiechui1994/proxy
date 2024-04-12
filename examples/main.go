@@ -77,7 +77,7 @@ func Parse(buf []byte) (Proxies, error) {
 }
 
 func main() {
-	raw, err := ioutil.ReadFile("/opt/clash/config.yaml")
+	raw, err := ioutil.ReadFile("/home/user/workspace/proxy/examples/hello.yaml")
 	if err != nil {
 		log.Printf("ReadFile:%v", err)
 		return

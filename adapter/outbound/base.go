@@ -1,5 +1,6 @@
 package outbound
 
+import "C"
 import (
 	"context"
 	"encoding/json"
@@ -17,6 +18,7 @@ type Base struct {
 	tp    constant.AdapterType
 	udp   bool
 	rmark int
+	prefer constant.DNSPrefer
 }
 
 // Name implements constant.ProxyAdapter
@@ -77,6 +79,7 @@ func (b *Base) DialOptions(opts ...dialer.Option) []dialer.Option {
 type BasicOption struct {
 	Interface   string `proxy:"interface-name,omitempty" group:"interface-name,omitempty"`
 	RoutingMark int    `proxy:"routing-mark,omitempty" group:"routing-mark,omitempty"`
+	IPVersion   string `proxy:"ip-version,omitempty" group:"ip-version,omitempty"`
 }
 
 type BaseOption struct {

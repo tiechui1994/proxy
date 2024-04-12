@@ -60,6 +60,13 @@ func ParseProxy(mapping map[string]interface{}) (constant.ProxyAdapter, error) {
 			break
 		}
 		proxy, err = outbound.NewVmess(*vmessOption)
+	case "vless":
+		vlessOption := &outbound.VlessOption{}
+		err = decoder.Decode(mapping, vlessOption)
+		if err != nil {
+			break
+		}
+		proxy, err = outbound.NewVless(*vlessOption)
 	case "trojan":
 		trojanOption := &outbound.TrojanOption{}
 		err = decoder.Decode(mapping, trojanOption)

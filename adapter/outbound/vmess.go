@@ -12,7 +12,7 @@ import (
 
 	"github.com/tiechui1994/proxy/component/dialer"
 	"github.com/tiechui1994/proxy/component/resolver"
-	 "github.com/tiechui1994/proxy/constant"
+	"github.com/tiechui1994/proxy/constant"
 	"github.com/tiechui1994/proxy/transport/gun"
 	"github.com/tiechui1994/proxy/transport/socks5"
 	"github.com/tiechui1994/proxy/transport/vmess"
