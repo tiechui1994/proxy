@@ -21,6 +21,7 @@ import (
 	"github.com/tiechui1994/proxy/transport/socks5"
 	"github.com/tiechui1994/proxy/transport/vless"
 	"github.com/tiechui1994/proxy/transport/vmess"
+	"golang.org/x/net/http2"
 )
 
 const (
@@ -36,7 +37,7 @@ type Vless struct {
 	// for gun mux
 	gunTLSConfig *tls.Config
 	gunConfig    *gun.Config
-	transport    *gun.TransportWrap
+	transport    *http2.Transport
 }
 
 type VlessOption struct {
@@ -107,7 +108,7 @@ func (v *Vless) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, e
 		c, err = vmess.StreamWebsocketConn(c, wsOpts)
 	case "http":
 		// readability first, so just copy default TLS logic
-		c, err = v.streamTLSOrXTLSConn(c, false)
+		c, err = v.streamTLSConn(c, false)
 		if err != nil {
 			return nil, err
 		}
@@ -122,7 +123,7 @@ func (v *Vless) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, e
 
 		c = vmess.StreamHTTPConn(c, httpOpts)
 	case "h2":
-		c, err = v.streamTLSOrXTLSConn(c, true)
+		c, err = v.streamTLSConn(c, true)
 		if err != nil {
 			return nil, err
 		}
@@ -137,8 +138,7 @@ func (v *Vless) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, e
 		c, err = gun.StreamGunWithConn(c, v.gunTLSConfig, v.gunConfig)
 	default:
 		// default tcp network
-		// handle TLS And XTLS
-		c, err = v.streamTLSOrXTLSConn(c, false)
+		c, err = v.streamTLSConn(c, false)
 	}
 
 	if err != nil {
@@ -148,7 +148,7 @@ func (v *Vless) StreamConn(c net.Conn, metadata *constant.Metadata) (net.Conn, e
 	return v.client.StreamConn(c, parseVlessAddr(metadata))
 }
 
-func (v *Vless) streamTLSOrXTLSConn(conn net.Conn, isH2 bool) (net.Conn, error) {
+func (v *Vless) streamTLSConn(conn net.Conn, isH2 bool) (net.Conn, error) {
 	host, _, _ := net.SplitHostPort(v.addr)
 	if v.option.TLS {
 		tlsOpts := vmess.TLSConfig{
@@ -175,7 +175,7 @@ func (v *Vless) streamTLSOrXTLSConn(conn net.Conn, isH2 bool) (net.Conn, error) 
 func (v *Vless) DialContext(ctx context.Context, metadata *constant.Metadata, opts ...dialer.Option) (_ constant.Conn, err error) {
 	// gun transport
 	if v.transport != nil && len(opts) == 0 {
-		c, err := gun.StreamGunWithTransport(v.transport.Transport, v.gunConfig)
+		c, err := gun.StreamGunWithTransport(v.transport, v.gunConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -214,7 +214,7 @@ func (v *Vless) ListenPacketContext(ctx context.Context, metadata *constant.Meta
 	var c net.Conn
 	// gun transport
 	if v.transport != nil && len(opts) == 0 {
-		c, err = gun.StreamGunWithTransport(v.transport.Transport, v.gunConfig)
+		c, err = gun.StreamGunWithTransport(v.transport, v.gunConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -420,7 +420,7 @@ func NewVless(option VlessOption) (*Vless, error) {
 
 		v.gunTLSConfig = tlsConfig
 		v.gunConfig = gunConfig
-		v.transport.Transport = gun.NewHTTP2Client(dialFn, tlsConfig)
+		v.transport = gun.NewHTTP2Client(dialFn, tlsConfig)
 	}
 
 	return v, nil
